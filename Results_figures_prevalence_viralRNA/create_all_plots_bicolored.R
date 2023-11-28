@@ -60,7 +60,7 @@ df_prevalence_by_group <- df_prevalence_by_group %>%
 # set the Y axis minimum: we will plot negatives at this value: these will be colored differently
 # (in grey) to indicate they are negative.
 y_axis_min <- 1e-5
-y_axis_max <- 1e+3
+y_axis_max <- 1e+4
 
 # Replace negative values with the lowest point on plot (negative)
 df <- df %>% mutate(Viral_Load = if_else(Infected != "Positive", y_axis_min, Viral_Load))
@@ -76,7 +76,8 @@ create_prev_plot <- function (a_Name = NA,
                               a_Transmission_mode = NA, 
                               a_Virus_target = NA,
                               facet_by = NA,
-                              color = "blue") {
+                              male_color = "blue",
+                              female_color = "lightblue") {
   
   df_to_plot <- df_prevalence_by_group
   
@@ -89,8 +90,10 @@ create_prev_plot <- function (a_Name = NA,
   if (!is.na(a_Virus_target))      { df_to_plot <- df_to_plot %>% filter(Virus_target == a_Virus_target) }
   
   p <- ggplot(df_to_plot) +
-    geom_point(aes(x = Sex, y = percent_positive), shape = 21, size = 3, fill = color, stroke = 0.25) +
-    geom_errorbar(aes(x = Sex, ymin = lower_conf_int, ymax = upper_conf_int), width = 0.1, color = color) +
+    geom_point(aes(x = Sex, y = percent_positive, fill = Sex), shape = 21, size = 3, stroke = 0.25) +
+    geom_errorbar(aes(x = Sex, ymin = lower_conf_int, ymax = upper_conf_int, color = Sex), width = 0.1) +
+    scale_fill_manual(values = c("Male" = male_color, "Female" = female_color)) +
+    scale_color_manual(values = c("Male" = male_color, "Female" = female_color)) +
     theme_bw() +
     ylim(c(0, 100)) +
     xlab("") +
@@ -103,8 +106,12 @@ create_prev_plot <- function (a_Name = NA,
     p <- p + facet_wrap(vars(.data[[facet_by]]))
   }
   
+  
+  
   p
 }
+
+
 
 create_levels_plot <- function (a_Name = NA, 
                                 a_Strain = NA, 
@@ -115,7 +122,8 @@ create_levels_plot <- function (a_Name = NA,
                                 facet_by = NA,
                                 ymin = y_axis_min,
                                 ymax = y_axis_max,
-                                color = "blue") {
+                                male_color = "blue",
+                                female_color = "lightblue") {
   
   df_to_plot <- df
   
@@ -129,9 +137,10 @@ create_levels_plot <- function (a_Name = NA,
   
   p <- ggplot() +
     geom_jitter(data = filter(df_to_plot, Infected == "Positive"), 
-                aes(x = Sex, y = Viral_Load), shape = 21, size = 3, fill = color, stroke = 0.25, height = 0, width = 0.1) +
+                aes(x = Sex, y = Viral_Load, fill = Sex), shape = 21, size = 3, stroke = 0.25, height = 0, width = 0.1) +
     geom_jitter(data = filter(df_to_plot, Infected != "Positive"), 
                 aes(x = Sex, y = Viral_Load), shape = 21, size = 3, fill = "grey50", stroke = 0.25, height = 0, width = 0.1) +
+    scale_fill_manual(values = c("Male" = male_color, "Female" = female_color)) +
     theme_bw() +
     scale_y_log10(limits = c(ymin, ymax)) +
     xlab("") +
@@ -149,42 +158,42 @@ create_levels_plot <- function (a_Name = NA,
 }
 
 
-make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Virus = "Aedes Anphevirus", color = "blue") {
+make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Virus = "Aedes Anphevirus", male_color = "blue", female_color = "lightblue") {
   
   
   # -----------------
   # Prevalence plots 
   # -----------------
   # Parent #1
-  p_p1 <- create_prev_plot(paste0(Parent1, " Starting Prevalence"), Parent1, NA, "Starting Prevalence", "starting prevalence", Virus)
+  p_p1 <- create_prev_plot(paste0(Parent1, " Starting Prevalence"), Parent1, NA, "Starting Prevalence", "starting prevalence", Virus, male_color = male_color, female_color = female_color)
   # Parent  #2
-  p_p2 <- create_prev_plot(paste0(Parent2, " Starting Prevalence"), Parent2, NA, "Starting Prevalence", "starting prevalence", Virus)
+  p_p2 <- create_prev_plot(paste0(Parent2, " Starting Prevalence"), Parent2, NA, "Starting Prevalence", "starting prevalence", Virus, male_color = male_color, female_color = female_color)
   # offspring maternal
-  p_om <- create_prev_plot(paste0(Parent1, " F x ", Parent2, " M"), "Hybrid", NA, "Offspring", "maternal", Virus, facet_by="Replicate")
+  p_om <- create_prev_plot(paste0(Parent1, " F x ", Parent2, " M"), "Hybrid", NA, "Offspring", "maternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   # offspring paternal
-  p_op <- create_prev_plot(paste0(Parent1, " M x ", Parent2, " F"), "Hybrid", NA, "Offspring", "paternal", Virus, facet_by="Replicate")
+  p_op <- create_prev_plot(paste0(Parent1, " M x ", Parent2, " F"), "Hybrid", NA, "Offspring", "paternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   
   # horizontal - female
-  p_hf  <- create_prev_plot(paste0(Parent2, " F x ", Parent1, " M"), NA, "Female", "After cohabitating", "Horizontal", Virus, facet_by="Replicate")
+  p_hf  <- create_prev_plot(paste0(Parent2, " F x ", Parent1, " M"), NA, "Female", "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   # horizontal - male
-  p_hm  <- create_prev_plot(paste0(Parent1, " F x ", Parent2, " M"), NA, "Male",   "After cohabitating", "Horizontal", Virus, facet_by="Replicate")
+  p_hm  <- create_prev_plot(paste0(Parent1, " F x ", Parent2, " M"), NA, "Male",   "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   
   # -----------------
   # Viral load plots
   # -----------------
   # Parent #1
-  l_p1 <- create_levels_plot(paste0(Parent1, " Starting Prevalence"), Parent1, NA, "Starting Prevalence", "starting prevalence", Virus)
+  l_p1 <- create_levels_plot(paste0(Parent1, " Starting Prevalence"), Parent1, NA, "Starting Prevalence", "starting prevalence", Virus, male_color = male_color, female_color = female_color)
   # Parent  #2
-  l_p2 <- create_levels_plot(paste0(Parent2, " Starting Prevalence"), Parent2, NA, "Starting Prevalence", "starting prevalence", Virus)
+  l_p2 <- create_levels_plot(paste0(Parent2, " Starting Prevalence"), Parent2, NA, "Starting Prevalence", "starting prevalence", Virus, male_color = male_color, female_color = female_color)
   # offspring maternal
-  l_om <- create_levels_plot(paste0(Parent1, " F x ", Parent2, " M"), "Hybrid", NA, "Offspring", "maternal", Virus, facet_by="Replicate")
+  l_om <- create_levels_plot(paste0(Parent1, " F x ", Parent2, " M"), "Hybrid", NA, "Offspring", "maternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   # offspring paternal
-  l_op <- create_levels_plot(paste0(Parent1, " M x ", Parent2, " F"), "Hybrid", NA, "Offspring", "paternal", Virus, facet_by="Replicate")
+  l_op <- create_levels_plot(paste0(Parent1, " M x ", Parent2, " F"), "Hybrid", NA, "Offspring", "paternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   
   # horizontal - female
-  l_hf  <- create_levels_plot(paste0(Parent2, " F x ", Parent1, " M"), NA, "Female", "After cohabitating", "Horizontal", Virus, facet_by="Replicate")
+  l_hf  <- create_levels_plot(paste0(Parent2, " F x ", Parent1, " M"), NA, "Female", "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   # horizontal - male
-  l_hm  <- create_levels_plot(paste0(Parent1, " F x ", Parent2, " M"), NA, "Male",   "After cohabitating", "Horizontal", Virus, facet_by="Replicate")
+  l_hm  <- create_levels_plot(paste0(Parent1, " F x ", Parent2, " M"), NA, "Male",   "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   
   # add labels to left-most plots
   p_p1 <- p_p1 + ylab("Positive mosquitoes (%)") + theme(axis.text.y = element_text())
@@ -202,17 +211,33 @@ make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Vi
 
 
 # make big plots
-make_one_big_plot("Poza Rica", "New Orleans", "Aedes Anphevirus", "blue")
-make_one_big_plot("Poza Rica", "Vergel",      "Aedes Anphevirus", "blue")
+make_one_big_plot("Poza Rica", "New Orleans", "Aedes Anphevirus", "#5BD0CF", "#009999")
+make_one_big_plot("Poza Rica", "Vergel",      "Aedes Anphevirus", "#5BD0CF", "#009999")
 
-make_one_big_plot("Poza Rica", "New Orleans", "Guadeloupe Mosquito Virus", "blue")
-make_one_big_plot("Poza Rica", "Vergel",      "Guadeloupe Mosquito Virus", "blue")
+make_one_big_plot("Poza Rica", "New Orleans", "Guadeloupe Mosquito Virus", "#B5A4EF", "#7F70B7")
+make_one_big_plot("Poza Rica", "Vergel",      "Guadeloupe Mosquito Virus", "#B5A4EF", "#7F70B7")
 
-make_one_big_plot("Poza Rica", "New Orleans", "Verdadero Virus", "blue")
-make_one_big_plot("Poza Rica", "Vergel",      "Verdadero Virus", "blue")
+make_one_big_plot("Poza Rica", "New Orleans", "Verdadero Virus", "#D64A61","#990033")
+make_one_big_plot("Poza Rica", "Vergel",      "Verdadero Virus", "#D64A61","#990033")
 
-make_one_big_plot("Tapachula", "New Orleans", "Guadeloupe Mosquito Virus", "blue")
-make_one_big_plot("Tapachula", "Vergel", "Guadeloupe Mosquito Virus", "blue")
+make_one_big_plot("Tapachula", "New Orleans", "Guadeloupe Mosquito Virus", "#B5A4EF", "#7F70B7")
+make_one_big_plot("Tapachula", "Vergel", "Guadeloupe Mosquito Virus", "#B5A4EF", "#7F70B7")
 
-make_one_big_plot("Tapachula", "New Orleans", "Phasi Charoen-like Virus", "blue")
-make_one_big_plot("Tapachula", "Vergel", "Phasi Charoen-like Virus", "blue")
+make_one_big_plot("Tapachula", "New Orleans", "Phasi Charoen-like Virus", "#499A39", "#006600")
+make_one_big_plot("Tapachula", "Vergel", "Phasi Charoen-like Virus", "#499A39","#006600")
+
+
+#Colors
+#AeAV
+  #009999 = Dark Teal
+  #5BD0CF = Light Teal (Dark teal ligher by 20%)
+#VeDV
+  #990033 = Dark Maroon
+  #D64A61 = Light Marron (20% lighter)
+#GMV
+  #7F70B7 = Dark Purple
+  #B5A4EF = Light Purple (20% lighter)
+#PCLV
+  #006600 = Dark Green
+  #499A39 = Light Green (20% lighter)
+
