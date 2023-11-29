@@ -211,33 +211,37 @@ make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Vi
 
 
 # make big plots
-make_one_big_plot("Poza Rica", "New Orleans", "Aedes Anphevirus", "#5BD0CF", "#009999")
-make_one_big_plot("Poza Rica", "Vergel",      "Aedes Anphevirus", "#5BD0CF", "#009999")
+make_one_big_plot("Poza Rica", "New Orleans", "Aedes Anphevirus", "#5BD0CF", "#006566")
+make_one_big_plot("Poza Rica", "Vergel",      "Aedes Anphevirus", "#5BD0CF", "#006566")
 
-make_one_big_plot("Poza Rica", "New Orleans", "Guadeloupe Mosquito Virus", "#B5A4EF", "#7F70B7")
-make_one_big_plot("Poza Rica", "Vergel",      "Guadeloupe Mosquito Virus", "#B5A4EF", "#7F70B7")
+make_one_big_plot("Poza Rica", "New Orleans", "Guadeloupe Mosquito Virus", "#B5A4EF", "#4B4082")
+make_one_big_plot("Poza Rica", "Vergel",      "Guadeloupe Mosquito Virus", "#B5A4EF", "#4B4082")
 
-make_one_big_plot("Poza Rica", "New Orleans", "Verdadero Virus", "#D64A61","#990033")
-make_one_big_plot("Poza Rica", "Vergel",      "Verdadero Virus", "#D64A61","#990033")
+make_one_big_plot("Poza Rica", "New Orleans", "Verdadero Virus", "#D64A61","#5E0006")
+make_one_big_plot("Poza Rica", "Vergel",      "Verdadero Virus", "#D64A61","#5E0006")
 
-make_one_big_plot("Tapachula", "New Orleans", "Guadeloupe Mosquito Virus", "#B5A4EF", "#7F70B7")
-make_one_big_plot("Tapachula", "Vergel", "Guadeloupe Mosquito Virus", "#B5A4EF", "#7F70B7")
+make_one_big_plot("Tapachula", "New Orleans", "Guadeloupe Mosquito Virus", "#B5A4EF", "#4B4082")
+make_one_big_plot("Tapachula", "Vergel", "Guadeloupe Mosquito Virus", "#B5A4EF", "#4B4082")
 
-make_one_big_plot("Tapachula", "New Orleans", "Phasi Charoen-like Virus", "#499A39", "#006600")
-make_one_big_plot("Tapachula", "Vergel", "Phasi Charoen-like Virus", "#499A39","#006600")
+make_one_big_plot("Tapachula", "New Orleans", "Phasi Charoen-like Virus", "#499A39", "#003500")
+make_one_big_plot("Tapachula", "Vergel", "Phasi Charoen-like Virus", "#499A39","#003500")
 
 
 #Colors
 #AeAV
-  #009999 = Dark Teal
-  #5BD0CF = Light Teal (Dark teal ligher by 20%)
+  #006566 - Dark Teal (20% Darker)
+  #009999 = Teal
+  #5BD0CF = Light Teal (20% lighter)
 #VeDV
-  #990033 = Dark Maroon
+  #5E0006 = Dark Maroon (20% Darker)
+  #990033 = Maroon
   #D64A61 = Light Marron (20% lighter)
 #GMV
-  #7F70B7 = Dark Purple
+  #4B4082 = Dark Purple (20% Darker)
+  #7F70B7 = Purple
   #B5A4EF = Light Purple (20% lighter)
 #PCLV
-  #006600 = Dark Green
+  #003500 = Dark Green (20% Darker)
+  #006600 = Green
   #499A39 = Light Green (20% lighter)
 
