@@ -7,6 +7,7 @@ library(binom)
 # read in all data
 df <- read_excel("all_data.xlsx")
 
+
 # ------------------------------
 # calculate prevalences by group 
 # ------------------------------
@@ -68,6 +69,20 @@ df <- df %>% mutate(Viral_Load = if_else(Infected != "Positive", y_axis_min, Vir
 # merge in prevalence info into main DF
 df <- left_join(df, df_prevalence_by_group)
 
+#Colors (Color corresponds to virus and shade corresponds to sex:dark = male, light = female)
+#AeAv
+dark_teal <- "#006566"
+light_teal <- "#5BD0CF"
+#VeDV
+dark_maroon <- "#5E0006"
+light_maroon <- "#D64A61"
+#GMV
+dark_purple <- "#4B4082"
+light_purple <- "#B5A4EF"
+#PCLV
+dark_green <- "#003500"
+light_green <- "#499A39"
+
 
 create_prev_plot <- function (a_Name = NA, 
                               a_Strain = NA, 
@@ -94,7 +109,7 @@ create_prev_plot <- function (a_Name = NA,
     geom_errorbar(aes(x = Sex, ymin = lower_conf_int, ymax = upper_conf_int, color = Sex), width = 0.1) +
     scale_fill_manual(values = c("Male" = male_color, "Female" = female_color)) +
     scale_color_manual(values = c("Male" = male_color, "Female" = female_color)) +
-    theme_bw() +
+    theme_bw(base_size = 13) +
     ylim(c(0, 100)) +
     xlab("") +
     ylab("") +
@@ -110,7 +125,6 @@ create_prev_plot <- function (a_Name = NA,
   
   p
 }
-
 
 
 create_levels_plot <- function (a_Name = NA, 
@@ -139,9 +153,9 @@ create_levels_plot <- function (a_Name = NA,
     geom_jitter(data = filter(df_to_plot, Infected == "Positive"), 
                 aes(x = Sex, y = Viral_Load, fill = Sex), shape = 21, size = 3, stroke = 0.25, height = 0, width = 0.1) +
     geom_jitter(data = filter(df_to_plot, Infected != "Positive"), 
-                aes(x = Sex, y = Viral_Load), shape = 21, size = 3, fill = "grey50", stroke = 0.25, height = 0, width = 0.1) +
+                aes(x = Sex, y = Viral_Load), shape = 21, size = 3, fill = "grey90", alpha = 0.5, stroke = 0.25, height = 0, width = 0.1) +
     scale_fill_manual(values = c("Male" = male_color, "Female" = female_color)) +
-    theme_bw() +
+    theme_bw(base_size = 13) +
     scale_y_log10(limits = c(ymin, ymax)) +
     xlab("") +
     ylab("") +
@@ -196,8 +210,8 @@ make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Vi
   l_hm  <- create_levels_plot(paste0(Parent1, " F x ", Parent2, " M"), NA, "Male",   "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   
   # add labels to left-most plots
-  p_p1 <- p_p1 + ylab("Positive mosquitoes (%)") + theme(axis.text.y = element_text())
-  l_p1 <- l_p1 + ylab("Viral RNA relative to Actin RNA") + theme(axis.text.y = element_text())
+  p_p1 <- p_p1 + ylab("Prevalence (% Positive Individuals)") + theme(axis.text.y = element_text())
+  l_p1 <- l_p1 + ylab("Viral RNA Levels in Infected Individuals\n(Viral RNA Relative to Actin RNA)") + theme(axis.text.y = element_text())
   
   # make a big plot with patchwork
   big_p <- ((p_p1 | p_p2 | p_om | p_op | p_hf | p_hm) / (l_p1 | l_p2 | l_om | l_op | l_hf | l_hm)) 
@@ -211,37 +225,18 @@ make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Vi
 
 
 # make big plots
-make_one_big_plot("Poza Rica", "New Orleans", "Aedes Anphevirus", "#5BD0CF", "#006566")
-make_one_big_plot("Poza Rica", "Vergel",      "Aedes Anphevirus", "#5BD0CF", "#006566")
+make_one_big_plot("Poza Rica", "New Orleans", "Aedes Anphevirus", dark_teal, light_teal)
+make_one_big_plot("Poza Rica", "Vergel",      "Aedes Anphevirus", dark_teal, light_teal)
 
-make_one_big_plot("Poza Rica", "New Orleans", "Guadeloupe Mosquito Virus", "#B5A4EF", "#4B4082")
-make_one_big_plot("Poza Rica", "Vergel",      "Guadeloupe Mosquito Virus", "#B5A4EF", "#4B4082")
+make_one_big_plot("Poza Rica", "New Orleans", "Guadeloupe Mosquito Virus", dark_purple, light_purple)
+make_one_big_plot("Poza Rica", "Vergel",      "Guadeloupe Mosquito Virus", dark_purple, light_purple)
 
-make_one_big_plot("Poza Rica", "New Orleans", "Verdadero Virus", "#D64A61","#5E0006")
-make_one_big_plot("Poza Rica", "Vergel",      "Verdadero Virus", "#D64A61","#5E0006")
+make_one_big_plot("Poza Rica", "New Orleans", "Verdadero Virus", dark_maroon, light_maroon)
+make_one_big_plot("Poza Rica", "Vergel",      "Verdadero Virus", dark_maroon, light_maroon)
 
-make_one_big_plot("Tapachula", "New Orleans", "Guadeloupe Mosquito Virus", "#B5A4EF", "#4B4082")
-make_one_big_plot("Tapachula", "Vergel", "Guadeloupe Mosquito Virus", "#B5A4EF", "#4B4082")
+make_one_big_plot("Tapachula", "New Orleans", "Guadeloupe Mosquito Virus", dark_purple, light_purple)
+make_one_big_plot("Tapachula", "Vergel", "Guadeloupe Mosquito Virus", dark_purple, light_purple)
 
-make_one_big_plot("Tapachula", "New Orleans", "Phasi Charoen-like Virus", "#499A39", "#003500")
-make_one_big_plot("Tapachula", "Vergel", "Phasi Charoen-like Virus", "#499A39","#003500")
-
-
-#Colors
-#AeAV
-  #006566 - Dark Teal (20% Darker)
-  #009999 = Teal
-  #5BD0CF = Light Teal (20% lighter)
-#VeDV
-  #5E0006 = Dark Maroon (20% Darker)
-  #990033 = Maroon
-  #D64A61 = Light Marron (20% lighter)
-#GMV
-  #4B4082 = Dark Purple (20% Darker)
-  #7F70B7 = Purple
-  #B5A4EF = Light Purple (20% lighter)
-#PCLV
-  #003500 = Dark Green (20% Darker)
-  #006600 = Green
-  #499A39 = Light Green (20% lighter)
+make_one_big_plot("Tapachula", "New Orleans", "Phasi Charoen-like Virus", dark_green, light_green)
+make_one_big_plot("Tapachula", "Vergel", "Phasi Charoen-like Virus", dark_green, light_green)
 
