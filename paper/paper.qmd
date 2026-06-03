@@ -301,7 +301,7 @@ This research was supported by NSF IOS 2048214.
 
 ## Acknowledgements
 
-The authors wish to thank Kai Chase, Susi Bennett, Irma Sanchez-Vargas, Megan Miller, Ashley Janich, Greg Pugh, and Brian Foy.
+The authors wish to thank Kai Chase, Susi Bennett, Irma Sanchez-Vargas, Megan Miller, Ashley Janich, Greg Pugh, and Bill Black IV, posthumously.
 
 ## Data availability
 
