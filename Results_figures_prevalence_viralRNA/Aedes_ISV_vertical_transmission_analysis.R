@@ -1019,7 +1019,7 @@ verdadero_text_horizontal <-
          " of New Orleans parents and ",
          create_prev_text(a_Strain_RegEx = "Vergel",
                           a_Virus_target = "Verdadero Virus", a_Stage = "After cohabitating"),
-         " of vergel parents were positive following cohabitation (**[@fig-verd]**). ",
+         " of Vergel parents were positive following cohabitation (**[@fig-verd]**). ",
          "Verdadero virus RNA levels in these mosquitoes were low, on average ",
          create_levels_text(a_Virus_target = "Verdadero Virus", 
                             a_Strain_RegEx = "Orleans|Vergel",
@@ -1371,6 +1371,8 @@ make_one_big_plot("Poza Rica", "Vergel",      "Aedes Anphevirus", dark_teal, lig
 make_one_big_plot("Poza Rica", "New Orleans", "Guadeloupe Mosquito Virus", dark_purple, light_purple)
 make_one_big_plot("Poza Rica", "Vergel",      "Guadeloupe Mosquito Virus", dark_purple, light_purple)
 
+
+
 make_one_big_plot("Poza Rica", "New Orleans", "Verdadero Virus", dark_maroon, light_maroon)
 make_one_big_plot("Poza Rica", "Vergel",      "Verdadero Virus", dark_maroon, light_maroon)
 
@@ -1385,6 +1387,53 @@ make_one_big_plot("Tapachula", "Vergel", "Phasi Charoen-like Virus", dark_green,
 # are infections in offspring independent?
 # -----------------------------------------
 
+df %>% group_by(Stage) %>% summarise()
+
+# make a wider version of parental data
+df_parents <- df %>% filter(Stage == "Starting Prevalence") %>% ungroup()
+
+df_parental_levels_wider <- 
+  df_parents %>% 
+  # select(Strain, Sex, Virus_target, Viral_Load, Crossed_with, infected_boolean, mosquito_number) %>%
+  select(Strain, Sex, Virus_target, Viral_Load, Crossed_with, mosquito_number) %>%
+  pivot_wider(id_cols=c(Strain, Sex, Crossed_with, mosquito_number),
+              names_from = Virus_target,
+              values_from = c(Viral_Load)) 
+
+# replace spaces in column names with underscores
+colnames(df_parental_levels_wider) <- str_replace_all(colnames(df_parental_levels_wider), " ", "_")
+
+df_pr_parental_levels_wider <- filter(df_parental_levels_wider, Strain == "Poza Rica")
+
+# parental loads of Anphevirus and Verdadero virus
+a_v_parents_cp <-
+  make_correlation_plot(df_pr_parental_levels_wider,
+                        "Aedes_Anphevirus",
+                        "Verdadero_Virus",
+                        "Sex",
+                        "Aedes anphevirus RNA",
+                        "Verdadero virus RNA") 
+a_v_parents_cp 
+
+# parental loads of Anphevirus and GMV 
+a_g_parents_cp <-
+  make_correlation_plot(df_pr_parental_levels_wider,
+                        "Aedes_Anphevirus",
+                        "Guadeloupe_Mosquito_Virus",
+                        "Sex",
+                        "Aedes anphevirus RNA",
+                        "Guadeloupe mosquito virus RNA") 
+a_g_parents_cp  + xlim(c(-5,3)) +ylim(c(-5,5))
+
+# parental loads of Verdadero and GMV 
+v_g_parents_cp <-
+  make_correlation_plot(df_pr_parental_levels_wider,
+                        "Verdadero_Virus",
+                        "Guadeloupe_Mosquito_Virus",
+                        "Sex",
+                        "Verdadero virus RNA",
+                        "Guadeloupe mosquito virus RNA") 
+v_g_parents_cp  + xlim(c(-5,3)) +ylim(c(-5,5))
 
 # make a wider 
 df_offspring_wider <- 
@@ -1418,6 +1467,8 @@ cor.test(log10(df_offspring_pat$Verdadero_Virus),
          log10(df_offspring_pat$Guadeloupe_Mosquito_Virus), 
          method="spearman", exact=F)
 
+a_v_p_ct
+a_g_p_ct
 v_g_p_ct
 
 # Maternal correlations
@@ -1436,6 +1487,9 @@ cor.test(log10(df_offspring_mat$Verdadero_Virus),
          log10(df_offspring_mat$Guadeloupe_Mosquito_Virus), 
          method="spearman", exact=F)
 
+a_v_m_ct
+a_g_m_ct
+v_g_m_ct
 
 correlation_stats_table <-
   tibble(comparison = c("Anphevirus-Verdadero", "Anphevirus-GMV", "Veradero-GMV"),
@@ -1454,7 +1508,7 @@ correlation_stats_table <-
        p_maternal = c( 
          a_v_m_ct$p.value,
          a_g_m_ct$p.value,
-         v_g_m_ct$p.value)))
+         v_g_m_ct$p.value))
 
 write.table(correlation_stats_table, file="correlation_stats_table.csv", 
             sep=",", row.names = F, col.names = T, quote = F)
