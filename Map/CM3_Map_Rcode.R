@@ -1,22 +1,22 @@
-install.packages("ggmap")
-install.packages("maps")
-install.packages("mapdata")
-install.packages("gridExtra")
-install.packages("ggpubr")
-install.packages("ggrepel")# Install ggrepel package
+# install.packages("ggmap")
+# install.packages("maps")
+# install.packages("mapdata")
+# install.packages("gridExtra")
+# install.packages("ggpubr")
+# install.packages("ggrepel")# Install ggrepel package
 
-library("ggrepel")     
+library(readxl)
+library(tidyverse)
+library(RColorBrewer)
+library(ggrepel)     
+
 library(ggplot2)
 library(ggmap)
 library(maps)
 library(mapdata)
-# library(plyr)
 library(dplyr)
-# library(googlesheets)
-library(readxl)
 library(gridExtra)
 library(ggpubr)
-library(RColorBrewer)
 
 # can read from google sheets?
 
@@ -55,7 +55,6 @@ myColors3 <- c("#999999", "#999999", "#999999", "#999999", "#999999", "#999999",
 #990000 = Red (Poza Rica)
 #336699 = Blue (Vergel)
 
-
 myColors <- brewer.pal(9,"Set1")
 myColors2 <- brewer.pal(12,"Set3")
 
@@ -65,8 +64,6 @@ fillScale <- scale_fill_manual(values = myColors2, na.value="black")
 fillScale <- scale_fill_manual(values = myColors3, na.value="black")
 fillScale <- scale_fill_grey()
 
-
-# unique(bunya_meta_data$Host_category)
 
 # geom_polygon -> makes base of map 
 # geom_point -> create points colored by host
@@ -136,7 +133,6 @@ countries_to_include <- c("USA","Brazil","Mexico", "Colombia", "Argentina", "Can
 us_and_central_america <- c("USA","Mexico", "Belize", "Guatemala", "Honduras", "Nicaragua", "El Salvador", "Costa Rica", "Panama")
 
 us_and_mexico_map <- map_data("world", region = us_and_central_america)
-?map_data
 
 # us_and_mexico_map <- filter(us_and_mexico_map, subregion !="Alaska" & subregion != "Hawaii")
 
