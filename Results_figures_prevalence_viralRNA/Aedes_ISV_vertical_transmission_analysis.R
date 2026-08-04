@@ -7,7 +7,7 @@ library(sjPlot)
 library(ResourceSelection)
 library(formatdown)
 library(flextable)
-library(modelsummary)
+library(gtsummary)
 
 
 # This script process, analyzes, and plots data
@@ -351,11 +351,63 @@ tab_model(anphe_model, anphe_ht_model,
           title="Aedes anphevirus")
 
 # to file
+anphe_tab_output <- 
 tab_model(anphe_model, anphe_ht_model, 
           show.aic = T, 
           dv.labels = c("Vertical transmission", "Horizontal transmission"),
           pred.labels = c("(Intercept)", "Offspring or exposed parent sex [male]", "Non-infected parent colony [Vergel]", "Vertical transmission mode [paternal]"),
           file=paste0(table_output_dir, "anphe_model_table.txt"))
+
+# format tables using gtsummary
+anphe_vt_model_table <- 
+  tbl_regression(anphe_model, 
+                 intercept = T, 
+                 show_single_row = c(
+                   Offspring_sex, 
+                   Non_infected_parent_colony, 
+                   Transmission_mode),
+                 label = list(
+                   Offspring_sex ~ "Offspring or exposed parent sex [male]",
+                   Non_infected_parent_colony ~ "Non-infected parent colony [Vergel]",
+                   Transmission_mode ~ "Vertical transmission mode [paternal]"
+                 ),
+                 exponentiate = T) %>%
+  add_glance_table(include = c(nobs, AIC),
+                   fmt_fun = 
+                     list(
+                       nobs ~ label_style_number(digits = 0),
+                       AIC  ~ function(x) sprintf("%.1f", x)
+                     )) %>%
+  modify_header(label ~ "**Predictor**")
+
+anphe_ht_model_table <- 
+  tbl_regression(anphe_ht_model, 
+                 intercept = T, 
+                 show_single_row = c(
+                   Offspring_sex, 
+                   Non_infected_parent_colony),
+                 label = list(
+                   Offspring_sex ~ "Offspring or exposed parent sex [male]",
+                   Non_infected_parent_colony ~ "Non-infected parent colony [Vergel]"
+                 ),
+                 exponentiate = T) %>%
+  add_glance_table(include = c(nobs, AIC),
+                   fmt_fun = 
+                     list(
+                       nobs ~ label_style_number(digits = 0),
+                       AIC  ~ function(x) sprintf("%.1f", x)
+                     )) %>%
+  modify_header(label ~ "**Predictor**")
+
+# Merge tables horizontally using gtsummary tbl_merge
+anphe_model_table <- tbl_merge(
+  tbls = list(anphe_vt_model_table, anphe_ht_model_table),
+  tab_spanner = c("**Vertical transmission**", "**Horizontal transmission**"),
+  quiet = T
+)
+anphe_model_table
+
+saveRDS(anphe_model_table, file = paste0(table_output_dir, "anphe_model_table.RDS"))
 
 # ------------------------
 # Verdadero virus modeling
@@ -466,6 +518,58 @@ tab_model(verdadero_model, verdadero_ht_model,
           pred.labels = c("(Intercept)", "Offspring or exposed parent sex [male]", "Non-infected parent colony [Vergel]", "Vertical transmission mode [paternal]"),
           file=paste0(table_output_dir, "verdadero_model_table.txt"))
 
+# format verdadero tables using gtsummary
+verdadero_vt_model_table <- 
+  tbl_regression(verdadero_model, 
+                 intercept = T, 
+                 show_single_row = c(
+                   Offspring_sex, 
+                   Non_infected_parent_colony, 
+                   Transmission_mode),
+                 label = list(
+                   Offspring_sex ~ "Offspring or exposed parent sex [male]",
+                   Non_infected_parent_colony ~ "Non-infected parent colony [Vergel]",
+                   Transmission_mode ~ "Vertical transmission mode [paternal]"
+                 ),
+                 exponentiate = T) %>%
+  add_glance_table(include = c(nobs, AIC),
+                   fmt_fun = 
+                     list(
+                       nobs ~ label_style_number(digits = 0),
+                       AIC  ~ function(x) sprintf("%.1f", x)
+                     )) %>%
+  modify_header(label ~ "**Predictor**")
+
+verdadero_ht_model_table <- 
+  tbl_regression(verdadero_ht_model, 
+                 intercept = T, 
+                 show_single_row = c(
+                   Offspring_sex, 
+                   Non_infected_parent_colony),
+                 label = list(
+                   Offspring_sex ~ "Offspring or exposed parent sex [male]",
+                   Non_infected_parent_colony ~ "Non-infected parent colony [Vergel]"
+                 ),
+                 exponentiate = T) %>%
+  add_glance_table(include = c(nobs, AIC),
+                   fmt_fun = 
+                     list(
+                       nobs ~ label_style_number(digits = 0),
+                       AIC  ~ function(x) sprintf("%.1f", x)
+                     )) %>%
+  modify_header(label ~ "**Predictor**")
+
+# Merge tables horizontally using gtsummary tbl_merge
+verdadero_model_table <- tbl_merge(
+  tbls = list(verdadero_vt_model_table, verdadero_ht_model_table),
+  tab_spanner = c("**Vertical transmission**", "**Horizontal transmission**"),
+  quiet = T
+)
+verdadero_model_table
+
+saveRDS(verdadero_model_table, file = paste0(table_output_dir, "verdadero_model_table.RDS"))
+
+
 
 # ---------------------------------- 
 # Phasi-charoen-like virus
@@ -501,7 +605,7 @@ gmv_model_1 <- glmer(infected_boolean ~
 
 summary(gmv_model_1)
 
-# now a model accounting for infected parent colony (Poza Rica vs Tapachula?)
+# now a model accounting for infected parent colony (Poza Rica vs. Tapachula?)
 gmv_model_2 <- glmer(infected_boolean ~ 
                        Offspring_sex + 
                        Infected_parent_colony +
@@ -650,6 +754,60 @@ tab_model(gmv_model, gmv_ht_model,
           show.ngroups = F,
           file=paste0(table_output_dir, "gmv_model_table.txt"))
 
+# format GMV tables using gtsummary
+gmv_vt_model_table <- 
+  tbl_regression(gmv_model, 
+                 intercept = T, 
+                 show_single_row = c(
+                   Offspring_sex, 
+                   Infected_parent_colony,
+                   Non_infected_parent_colony, 
+                   Transmission_mode),
+                 label = list(
+                   Offspring_sex ~ "Offspring or exposed parent sex [male]",
+                   Infected_parent_colony ~ "Main infected parent colony [Tapachula]", 
+                   Non_infected_parent_colony ~ "Less infected parent colony [Vergel]",
+                   Transmission_mode ~ "Vertical transmission mode [paternal]"
+                 ),
+                 exponentiate = T) %>%
+  add_glance_table(include = c(nobs, AIC),
+                   fmt_fun = 
+                     list(
+                       nobs ~ label_style_number(digits = 0),
+                       AIC  ~ function(x) sprintf("%.1f", x)
+                     )) %>%
+  modify_header(label ~ "**Predictor**")
+
+gmv_ht_model_table <- 
+  tbl_regression(gmv_ht_model, 
+                 intercept = T, 
+                 show_single_row = c(
+                   Offspring_sex, 
+                   Infected_parent_colony,
+                   Non_infected_parent_colony),
+                 label = list(
+                   Offspring_sex ~ "Offspring or exposed parent sex [male]",
+                   Infected_parent_colony ~ "Main infected parent colony [Tapachula]", 
+                   Non_infected_parent_colony ~ "Less infected parent colony [Vergel]"
+                 ),
+                 exponentiate = T) %>%
+  add_glance_table(include = c(nobs, AIC),
+                   fmt_fun = 
+                     list(
+                       nobs ~ label_style_number(digits = 0),
+                       AIC  ~ function(x) sprintf("%.1f", x)
+                     )) %>%
+  modify_header(label ~ "**Predictor**")
+
+# Merge tables horizontally using gtsummary tbl_merge
+gmv_model_table <- tbl_merge(
+  tbls = list(gmv_vt_model_table, gmv_ht_model_table),
+  tab_spanner = c("**Vertical transmission**", "**Horizontal transmission**"),
+  quiet = T
+)
+gmv_model_table
+
+saveRDS(gmv_model_table, file = paste0(table_output_dir, "gmv_model_table.RDS"))
 
 # ************************************************************************************************
 # -------------------------
@@ -813,10 +971,10 @@ anphe_text_parent <-
          " The mean level of anphevirus RNA in infected males and females was ",
          create_levels_text(a_Sex = "Male", a_Strain = "Poza Rica", 
                             a_Virus_target = "Aedes Anphevirus", a_Stage = "Starting Prevalence"),
-         "x and ",
+         "× and ",
          create_levels_text(a_Sex = "Female", a_Strain = "Poza Rica", 
                             a_Virus_target = "Aedes Anphevirus", a_Stage = "Starting Prevalence"),
-         "x the level of actin mRNA. ",
+         "× the level of actin mRNA, respectively. ",
          "No mosquitoes in the New Orleans or Vergel colonies tested positive for AeAV by metagenomic sequencing or by RT-qPCR."
   )
 
@@ -828,12 +986,12 @@ anphe_text_offspring <-
          create_prev_text(a_Strain = "Hybrid",
                           a_Virus_target = "Aedes Anphevirus", a_Stage = "Offspring", 
                           a_Transmission_mode = "maternal"),
-         " of offspring of Poza Rica mothers tested positive for anphevirus RNA. ",
+         " of the offspring of Poza Rica mothers tested positive for anphevirus RNA. ",
          "Transmission from infected fathers was less efficient: ", 
          create_prev_text(a_Strain = "Hybrid",
                           a_Virus_target = "Aedes Anphevirus", a_Stage = "Offspring", 
                           a_Transmission_mode = "paternal"),
-         " of offspring of infected fathers tested positive. ",
+         " of the offspring of infected fathers tested positive. ",
          "The mean level of anphevirus RNA in infected offspring was similar for maternal ",
          "and paternal transmission: ",
          create_levels_text(a_Strain = "Hybrid",
@@ -848,7 +1006,7 @@ anphe_text_offspring <-
          "× the level of actin mRNA, respectively. ",
          "Offspring exhibited a bimodal distribution of anphevirus RNA levels (**[@fig-anphe]**). ",
          "A subset of positive offspring had relatively high anphevirus RNA levels (higher than actin mRNA levels), ",
-         "and a subset had levels ~1000× lower. ",
+         "and another subset had levels ~1000× lower. ",
          "Transmission efficiencies were similar in crosses involving uninfected parents from the New Orleans and the Vergel colonies (**[@fig-anphe]**)."
   )
 
@@ -917,7 +1075,7 @@ anphe_text_vt_model <-
   paste0("We used logistic regression to model anphevirus ",
          "transmission (**[@tbl-anphe-model]**). ",
          "Models for vertical transmission contained transmission mode (maternal vs. paternal), ",
-         "uninfected parent colony (New Orleans vs Vergel), and offspring sex as fixed effects. ",
+         "uninfected parent colony (New Orleans vs. Vergel), and offspring sex as fixed effects. ",
          "Models that included replicate as a random effect were not significantly better fitting. ",
          "For vertical transmission, transmission mode was the only significant predictor variable, ",
          "with offspring more likely to be infected via maternal transmission (p = ",
@@ -930,10 +1088,10 @@ anphe_text_ht_model <-  paste0(
          "Models for horizontal transmission included exposed parent colony (New Orleans vs Vergel) ",
          "and sex as fixed effects. ",
          "For horizontal transmission, exposed parent sex was the only significant predictor, ",
-         "with females more likely to test postive following exposure to infected fathers (p = ",
+         "with females more likely to test positive following exposure to infected fathers (p = ",
          sci_notation(anphe_ep_pval, digits = 1),
          " ; **[@tbl-anphe-model]**). ",
-         "The higher prevalence in females may reflect exposure and possible transmission during mating."
+         "The higher prevalence in females may reflect possible sexual transmission during mating."
 )
 anphe_text_ht_model
 
@@ -983,12 +1141,12 @@ verdadero_text_offspring <-
          create_prev_text(a_Strain = "Hybrid",
                           a_Virus_target = "Verdadero Virus", a_Stage = "Offspring", 
                           a_Transmission_mode = "maternal"),
-         " of offspring of Poza Rica mothers tested positive for verdadero virus RNA. ",
+         " of the offspring of Poza Rica mothers tested positive for verdadero virus RNA. ",
          "Paternal transmission was less efficient, with only ", 
          create_prev_text(a_Strain = "Hybrid",
                           a_Virus_target = "Verdadero Virus", a_Stage = "Offspring", 
                           a_Transmission_mode = "paternal"),
-         " of offspring infected from Poza Rica fathers. ",
+         " of the offspring of Poza Rica fathers. ",
          "The mean level of anphevirus RNA in infected offspring was similar for maternal ",
          "and paternal transmission: ",
          create_levels_text(a_Strain = "Hybrid",
@@ -1095,14 +1253,15 @@ gmv_text_parent <-
     create_prev_text(a_Strain = "New Orleans",  a_Virus_target = "Guadeloupe Mosquito Virus", a_Stage = "Starting Prevalence"),
     " and ",
     create_prev_text(a_Strain = "Vergel",  a_Virus_target = "Guadeloupe Mosquito Virus", a_Stage = "Starting Prevalence"),
-    ", respectively. ",
+    ", respectively (**[@fig-gmv]**).  ",
     "This was unexpected because no GMV-mapping reads were detected by metagenomics in these colonies. ",
     "The lack of detection of GMV in these colonies by metagenomic likely reflects ",
-    "the low RNA levels in infected mosquitoes (**[@fig-gmv]**). ",
-    "We performed qPCR without reverse transcription to confirm that low-level detection did not ",
+    "the low GMV RNA levels in infected mosquitoes (**[@fig-gmv]**). ",
+    "We confirmed the identity of the GMV PCR product amplified from New Orleans and Vergel adults by ",
+    "agarose gel electrophoresis and Sanger sequencing. ",
+    "The GMV sequences from the 4 colonies shared > 98.9% pairwise identity in the amplified region, but were not identical (**[@suppfig-gmv-msa]**). ",
+    "We also performed qPCR without reverse transcription to confirm that low-level detection did not ",
     "result from transcription of a GMV-like endogenized viral sequence [@Palatini_2017; @Whitfield_2017]. ",
-    "We confirmed the identity of the GMV PCR product by melting temperature, ",
-    "agarose gel electropheresis, and Sanger sequencing [Tillie, did you do this?]. ",
     "The presence of GMV in all parental populations meant that it was not possible to ",
     "definitively determine whether infection ",
     "in offspring derived from maternal or paternal transmission. ",
@@ -1182,7 +1341,7 @@ gmv_text_ht <- paste0(
   "(**[@tbl-gmv-model]**; p = ",
   sci_notation(gmv_ht_es_pval, 1),
   "). ",
-  "Cohabitaing mosquitoes were also more likely to test positive following exposure to ",
+  "Cohabiting mosquitoes were also more likely to test positive following exposure to ",
   "Poza Rica adults ", 
   "(**[@tbl-gmv-model]**; p = ",
   sci_notation(gmv_ht_ip_pval, 1),
@@ -1279,6 +1438,22 @@ create_levels_plot <- function (a_Name = NA,
   
   df_to_plot <- df
   
+  debug <- 0
+  if (debug){
+    a_Name = paste0("Poza Rica", " F x ", "New Orleans", " M")
+    a_Strain = "Hybrid"
+    a_Sex = NA
+    a_Stage = "Offspring"
+    a_Transmission_mode = "maternal"
+    a_Virus_target = "Aedes Anphevirus"
+    facet_by="Replicate"
+    ymin = y_axis_min
+    ymax = y_axis_max
+    male_color = "blue"
+    female_color = "lightblue"
+  }
+  a_Name
+  
   # progressivly filter the data
   if (!is.na(a_Name))              { df_to_plot <- df_to_plot %>% filter(Name == a_Name) }
   if (!is.na(a_Strain))            { df_to_plot <- df_to_plot %>% filter(Strain == a_Strain) }
@@ -1310,10 +1485,21 @@ create_levels_plot <- function (a_Name = NA,
 }
 
 
-
-
-make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Virus = "Aedes Anphevirus", male_color = "blue", female_color = "lightblue") {
+make_one_big_plot <- function(Parent1 = "Poza Rica", 
+                              Parent2 = "New Orleans", 
+                              Virus = "Aedes Anphevirus", 
+                              male_color = "blue", 
+                              female_color = "lightblue") {
   
+  
+  debug <- 0
+  if (debug) {
+    Parent1 = "Poza Rica"
+    Parent2 = "New Orleans"
+    Virus = "Aedes Anphevirus"
+    male_color = "blue"
+    female_color = "lightblue"
+  }
   
   # -----------------
   # Prevalence plots 
@@ -1323,14 +1509,14 @@ make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Vi
   # Parent  #2
   p_p2 <- create_prev_plot(paste0(Parent2, " Starting Prevalence"), Parent2, NA, "Starting Prevalence", "starting prevalence", Virus, male_color = male_color, female_color = female_color)
   # offspring maternal
-  p_om <- create_prev_plot(paste0(Parent1, " F × ", Parent2, " M"), "Hybrid", NA, "Offspring", "maternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
+  p_om <- create_prev_plot(paste0(Parent1, " F x ", Parent2, " M"), "Hybrid", NA, "Offspring", "maternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   # offspring paternal
-  p_op <- create_prev_plot(paste0(Parent1, " M × ", Parent2, " F"), "Hybrid", NA, "Offspring", "paternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
+  p_op <- create_prev_plot(paste0(Parent1, " M x ", Parent2, " F"), "Hybrid", NA, "Offspring", "paternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   
   # horizontal - female
-  p_hf  <- create_prev_plot(paste0(Parent2, " F × ", Parent1, " M"), NA, "Female", "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
+  p_hf  <- create_prev_plot(paste0(Parent2, " F x ", Parent1, " M"), NA, "Female", "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   # horizontal - male
-  p_hm  <- create_prev_plot(paste0(Parent1, " F × ", Parent2, " M"), NA, "Male",   "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
+  p_hm  <- create_prev_plot(paste0(Parent1, " F x ", Parent2, " M"), NA, "Male",   "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   
   # -----------------
   # Viral load plots
@@ -1340,14 +1526,14 @@ make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Vi
   # Parent  #2
   l_p2 <- create_levels_plot(paste0(Parent2, " Starting Prevalence"), Parent2, NA, "Starting Prevalence", "starting prevalence", Virus, male_color = male_color, female_color = female_color)
   # offspring maternal
-  l_om <- create_levels_plot(paste0(Parent1, " F × ", Parent2, " M"), "Hybrid", NA, "Offspring", "maternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
+  l_om <- create_levels_plot(paste0(Parent1, " F x ", Parent2, " M"), "Hybrid", NA, "Offspring", "maternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   # offspring paternal
-  l_op <- create_levels_plot(paste0(Parent1, " M × ", Parent2, " F"), "Hybrid", NA, "Offspring", "paternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
+  l_op <- create_levels_plot(paste0(Parent1, " M x ", Parent2, " F"), "Hybrid", NA, "Offspring", "paternal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   
   # horizontal - female
-  l_hf  <- create_levels_plot(paste0(Parent2, " F × ", Parent1, " M"), NA, "Female", "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
+  l_hf  <- create_levels_plot(paste0(Parent2, " F x ", Parent1, " M"), NA, "Female", "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   # horizontal - male
-  l_hm  <- create_levels_plot(paste0(Parent1, " F × ", Parent2, " M"), NA, "Male",   "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
+  l_hm  <- create_levels_plot(paste0(Parent1, " F x ", Parent2, " M"), NA, "Male",   "After cohabitating", "Horizontal", Virus, facet_by="Replicate", male_color = male_color, female_color = female_color)
   
   # add labels to left-most plots
   p_p1 <- p_p1 + ylab("Prevalence (% Positive Individuals)") + theme(axis.text.y = element_text())
@@ -1357,12 +1543,11 @@ make_one_big_plot <- function(Parent1 = "Poza Rica", Parent2 = "New Orleans", Vi
   big_p <- ((p_p1 | p_p2 | p_om | p_op | p_hf | p_hm) / (l_p1 | l_p2 | l_om | l_op | l_hf | l_hm)) 
   
   # save as PDF
-  plot_filename <- paste0(Parent1, "_x_", Parent2, "_", Virus, "_without_full_annotation.pdf")
-  ggsave(filename = plot_filename, plot = big_p,  width=12, height=8, units="in")
+  plot_filename <- paste0(Parent1, "_×_", Parent2, "_", Virus, "_without_full_annotation.pdf")
+  # ggsave(filename = plot_filename, plot = big_p,  width=12, height=8, units="in")
   
   big_p
 }
-
 
 # make big plots
 make_one_big_plot("Poza Rica", "New Orleans", "Aedes Anphevirus", dark_teal, light_teal)
@@ -1371,292 +1556,9 @@ make_one_big_plot("Poza Rica", "Vergel",      "Aedes Anphevirus", dark_teal, lig
 make_one_big_plot("Poza Rica", "New Orleans", "Guadeloupe Mosquito Virus", dark_purple, light_purple)
 make_one_big_plot("Poza Rica", "Vergel",      "Guadeloupe Mosquito Virus", dark_purple, light_purple)
 
-
-
 make_one_big_plot("Poza Rica", "New Orleans", "Verdadero Virus", dark_maroon, light_maroon)
 make_one_big_plot("Poza Rica", "Vergel",      "Verdadero Virus", dark_maroon, light_maroon)
 
 make_one_big_plot("Tapachula", "New Orleans", "Guadeloupe Mosquito Virus", dark_purple, light_purple)
 make_one_big_plot("Tapachula", "Vergel", "Guadeloupe Mosquito Virus", dark_purple, light_purple)
 
-make_one_big_plot("Tapachula", "New Orleans", "Phasi Charoen-like Virus", dark_green, light_green)
-make_one_big_plot("Tapachula", "Vergel", "Phasi Charoen-like Virus", dark_green, light_green)
-
-
-# -----------------------------------------
-# are infections in offspring independent?
-# -----------------------------------------
-
-df %>% group_by(Stage) %>% summarise()
-
-# make a wider version of parental data
-df_parents <- df %>% filter(Stage == "Starting Prevalence") %>% ungroup()
-
-df_parental_levels_wider <- 
-  df_parents %>% 
-  # select(Strain, Sex, Virus_target, Viral_Load, Crossed_with, infected_boolean, mosquito_number) %>%
-  select(Strain, Sex, Virus_target, Viral_Load, Crossed_with, mosquito_number) %>%
-  pivot_wider(id_cols=c(Strain, Sex, Crossed_with, mosquito_number),
-              names_from = Virus_target,
-              values_from = c(Viral_Load)) 
-
-# replace spaces in column names with underscores
-colnames(df_parental_levels_wider) <- str_replace_all(colnames(df_parental_levels_wider), " ", "_")
-
-df_pr_parental_levels_wider <- filter(df_parental_levels_wider, Strain == "Poza Rica")
-
-# parental loads of Anphevirus and Verdadero virus
-a_v_parents_cp <-
-  make_correlation_plot(df_pr_parental_levels_wider,
-                        "Aedes_Anphevirus",
-                        "Verdadero_Virus",
-                        "Sex",
-                        "Aedes anphevirus RNA",
-                        "Verdadero virus RNA") 
-a_v_parents_cp 
-
-# parental loads of Anphevirus and GMV 
-a_g_parents_cp <-
-  make_correlation_plot(df_pr_parental_levels_wider,
-                        "Aedes_Anphevirus",
-                        "Guadeloupe_Mosquito_Virus",
-                        "Sex",
-                        "Aedes anphevirus RNA",
-                        "Guadeloupe mosquito virus RNA") 
-a_g_parents_cp  + xlim(c(-5,3)) +ylim(c(-5,5))
-
-# parental loads of Verdadero and GMV 
-v_g_parents_cp <-
-  make_correlation_plot(df_pr_parental_levels_wider,
-                        "Verdadero_Virus",
-                        "Guadeloupe_Mosquito_Virus",
-                        "Sex",
-                        "Verdadero virus RNA",
-                        "Guadeloupe mosquito virus RNA") 
-v_g_parents_cp  + xlim(c(-5,3)) +ylim(c(-5,5))
-
-# make a wider 
-df_offspring_wider <- 
-  df_offspring %>% 
-  pivot_wider(id_cols=c(Transmission_mode, Maternal_colony, Paternal_colony, Replicate, Sex, mosquito_number),
-              names_from = Virus_target,
-              values_from = c(Viral_Load)) 
-
-# replace spaces in column names with underscores
-colnames(df_offspring_wider) <- str_replace_all(colnames(df_offspring_wider), " ", "_")
-
-
-# subset datasets for plotting correlation of infection in offspring of multiply-infected parents
-df_offspring_pat  <-  filter(df_offspring_wider,  Transmission_mode == "paternal" & Paternal_colony == "Poza Rica")
-df_offspring_mat  <-  filter(df_offspring_wider,  Transmission_mode == "maternal" & Maternal_colony == "Poza Rica")
-
-
-# Paternal correlations
-a_v_p_ct <-
-cor.test(log10(df_offspring_pat$Aedes_Anphevirus), 
-         log10(df_offspring_pat$Verdadero_Virus), 
-         method="spearman", exact=F)
-
-a_g_p_ct <-
-cor.test(log10(df_offspring_pat$Aedes_Anphevirus), 
-         log10(df_offspring_pat$Guadeloupe_Mosquito_Virus), 
-         method="spearman", exact=F)
-
-v_g_p_ct <-
-cor.test(log10(df_offspring_pat$Verdadero_Virus), 
-         log10(df_offspring_pat$Guadeloupe_Mosquito_Virus), 
-         method="spearman", exact=F)
-
-a_v_p_ct
-a_g_p_ct
-v_g_p_ct
-
-# Maternal correlations
-a_v_m_ct <-
-cor.test(log10(df_offspring_mat$Aedes_Anphevirus), 
-         log10(df_offspring_mat$Verdadero_Virus), 
-         method="spearman", exact=F)
-
-a_g_m_ct <-
-cor.test(log10(df_offspring_mat$Aedes_Anphevirus), 
-         log10(df_offspring_mat$Guadeloupe_Mosquito_Virus), 
-         method="spearman", exact=F)
-
-v_g_m_ct <-
-cor.test(log10(df_offspring_mat$Verdadero_Virus), 
-         log10(df_offspring_mat$Guadeloupe_Mosquito_Virus), 
-         method="spearman", exact=F)
-
-a_v_m_ct
-a_g_m_ct
-v_g_m_ct
-
-correlation_stats_table <-
-  tibble(comparison = c("Anphevirus-Verdadero", "Anphevirus-GMV", "Veradero-GMV"),
-       rho_paternal = c(
-         a_v_p_ct$estimate,
-         a_g_p_ct$estimate,
-         v_g_p_ct$estimate),
-       p_paternal = c( 
-         a_v_p_ct$p.value,
-         a_g_p_ct$p.value,
-         v_g_p_ct$p.value),
-       rho_maternal = c(
-         a_v_m_ct$estimate,
-         a_g_m_ct$estimate,
-         v_g_m_ct$estimate),
-       p_maternal = c( 
-         a_v_m_ct$p.value,
-         a_g_m_ct$p.value,
-         v_g_m_ct$p.value))
-
-write.table(correlation_stats_table, file="correlation_stats_table.csv", 
-            sep=",", row.names = F, col.names = T, quote = F)
-
-
-# what about statistical independence?
-# chi-squared test
-
-# make contingency table
-df_infected_by_group <-
-  df_offspring %>%
-  group_by(Transmission_mode, Maternal_colony, Paternal_colony, Replicate, Virus_target, Infected) %>%
-  summarize(n=n()) 
-
-
-df_total_infected_counts <- 
-  df_infected_by_group  %>% 
-  filter(Transmission_mode == "paternal" & Paternal_colony == "Poza Rica")  %>%
-  group_by(Virus_target, Infected) %>%
-  summarize(total_infected = sum(n), .groups="drop")
-
-# contingency matrix
-df_paternal_transmission_contingency_matrix <- 
-  df_total_infected_counts %>% pivot_wider(names_from = Infected, values_from = total_infected)
-
-rn <- df_paternal_transmission_contingency_matrix$Virus_target
-df_paternal_transmission_contingency_matrix <- as.matrix(df_paternal_transmission_contingency_matrix %>% select(-Virus_target))
-row.names(df_paternal_transmission_contingency_matrix) <- rn
-
-df_paternal_transmission_contingency_matrix 
-
-chisq.test(df_paternal_transmission_contingency_matrix[])
-
-# make a wider 
-
-df_offspring_wider_status <- 
-  df_offspring %>% 
-  pivot_wider(id_cols=c(Transmission_mode, Maternal_colony, Paternal_colony, Replicate, Sex, mosquito_number),
-              names_from = Virus_target,
-              values_from = c(Infected)) 
-
-write.table(df_offspring_wider_status, file="cm.tsv", sep="\t", row.names=F, quote = F)
-
-# replace spaces in column names with underscores
-colnames(df_offspring_wider_status) <- str_replace_all(colnames(df_offspring_wider_status), " ", "_")
-
-
-# this function creates a correlation plot between viral RNA levels in offspring
-make_correlation_plot <- function(df_to_plot, 
-                                  x_var,
-                                  y_var,
-                                  fill_var,
-                                  x_lab, 
-                                  y_lab) {
-  
-  x_var_sym    <- sym(x_var)
-  y_var_sym    <- sym(y_var)
-  fill_var_sym <- sym(fill_var)
-  
-  ggplot(df_to_plot) +
-    geom_point(aes(x=log10(!!x_var_sym),
-                   y=log10(!!y_var_sym),
-                   fill=!!fill_var_sym),
-               shape=21, color="black", size=2, stroke=0.25) +
-    theme_bw(base_size = 8) +
-    # scale_y_log10(limits=c(1e-5, 1e3)) +
-    # scale_x_log10(limits=c(1e-5, 1e3)) +
-    xlim(c(-5, 3)) +
-    ylim(c(-5, 3)) +
-    scale_fill_manual(values=c("#BB2649", "#6667AB")) +
-    xlab(x_lab) +
-    ylab(y_lab) + 
-    coord_fixed() +
-    theme(legend.position = "none")
-}
-
-# paternal transmission of Anphevirus and Verdadero virus
-a_v_p_cp <-
-make_correlation_plot(df_offspring_pat,
-                      "Aedes_Anphevirus",
-                      "Verdadero_Virus",
-                      "Maternal_colony",
-                      "Aedes anphevirus RNA",
-                      "Verdadero virus RNA") 
-a_v_p_cp 
-
-# paternal transmission of Anphevirus and GMV 
-a_g_p_cp <-
-make_correlation_plot(df_offspring_pat,
-                      "Aedes_Anphevirus",
-                      "Guadeloupe_Mosquito_Virus",
-                      "Maternal_colony",
-                      "Aedes anphevirus RNA", 
-                      "Guadeloupe mosq. virus RNA")
-a_g_p_cp
-
-# paternal transmission of Verdadero virus and GMV 
-v_g_p_cp <-
-make_correlation_plot(df_offspring_pat,
-                      "Verdadero_Virus",
-                      "Guadeloupe_Mosquito_Virus",
-                      "Maternal_colony",
-                      "Verdadero virus RNA",
-                      "Guadeloupe mosq. virus RNA") 
-v_g_p_cp 
-
-# add a legend to right-most plot
-v_g_p_cp  <-  v_g_p_cp  + theme(legend.position = "right")
-
-a_v_p_cp +  a_g_p_cp + v_g_p_cp + plot_layout(nrow = 1)
-ggsave("paternal_transmission_correlation_plot.pdf", units="in", width=7.5, height=5)
-
-# ---------------------
-# Maternal transmission
-# ---------------------
-
-# maternal transmission of Anphevirus and Verdadero virus
-a_v_m_cp <-
-make_correlation_plot(df_offspring_mat,
-                      "Aedes_Anphevirus",
-                      "Verdadero_Virus",
-                      "Paternal_colony",
-                      "Aedes anphevirus RNA",
-                      "Verdadero virus RNA") 
-a_v_m_cp 
-
-# maternal transmission of Anphevirus and GMV 
-a_g_m_cp <-
-make_correlation_plot(df_offspring_mat,
-                      "Aedes_Anphevirus",
-                      "Guadeloupe_Mosquito_Virus",
-                      "Paternal_colony",
-                      "Aedes anphevirus RNA", 
-                      "Guadeloupe mosq. virus RNA")
-a_g_m_cp
-
-# maternal transmission of Verdadero virus and GMV 
-v_g_m_cp <-
-make_correlation_plot(df_offspring_mat,
-                      "Verdadero_Virus",
-                      "Guadeloupe_Mosquito_Virus",
-                      "Paternal_colony",
-                      "Verdadero virus RNA",
-                      "Guadeloupe mosq. virus RNA") 
-v_g_m_cp 
-
-# add a legend to right-most plot
-v_g_m_cp  <-  v_g_m_cp  + theme(legend.position = "right")
-
-a_v_m_cp +  a_g_m_cp + v_g_m_cp + plot_layout(nrow = 1)
-ggsave("maternal_transmission_correlation_plot.pdf", units="in", width=7.5, height=5)
