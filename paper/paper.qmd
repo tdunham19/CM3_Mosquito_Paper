@@ -285,15 +285,7 @@ gmv_model_table
 
 ### 
 
-<!-- R objects with information about reptarenavirus classification --> 
-<!-- this RDS output from script in this repo: bin/reptarenavirus_taxonomy.R -->
-```{r include=F}
-# rept_spp <- readRDS("./RDS/reptarenavirus_species.RDS")
-```
-
-
 {{< pagebreak >}}
-
 
 ## Discussion
 
