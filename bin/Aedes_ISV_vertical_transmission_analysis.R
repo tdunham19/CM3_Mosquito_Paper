@@ -15,13 +15,13 @@ library(gtsummary)
 
 if (!interactive()) {
   # if running from Rscript
-  args         = commandArgs(trailingOnly=TRUE)
-  qpcr_input   = args[1]
-  output_dir   = "./"
+  args           = commandArgs(trailingOnly=TRUE)
+  qpcr_input     = args[1]
+  output_dir     = "./"
 } else {
   # if running via RStudio
-  qpcr_input   = args[1]
-  output_dir   = "../paper/"
+  qpcr_input     = "../data/all_qPCR_data.xlsx"
+  output_dir     = "../paper/"
 }
 
 
@@ -31,6 +31,11 @@ table_output_dir  <- paste0(output_dir, "/tables/")
 text_output_dir   <- paste0(output_dir, "/text/")
 output_text <- ""
 
+# create output dirs if necessary
+if (!dir.exists(plot_output_dir))  { dir.create(plot_output_dir) }
+if (!dir.exists(table_output_dir)) { dir.create(table_output_dir) }
+if (!dir.exists(text_output_dir))  { dir.create(text_output_dir) }
+
 
 # ************************************************************************************************
 # ------------------------
@@ -39,7 +44,7 @@ output_text <- ""
 # ************************************************************************************************
 
 # read in all data
-df <- read_excel("../data/all_qPCR_data.xlsx")
+df <- read_excel(qpcr_input)
 
 # make a boolean version of infected (character)
 df <- df %>% mutate(infected_boolean = if_else(Infected == "Positive", T, F))
@@ -1528,3 +1533,5 @@ make_one_big_plot("Poza Rica", "Vergel",      "Verdadero Virus", dark_maroon, li
 
 make_one_big_plot("Tapachula", "New Orleans", "Guadeloupe Mosquito Virus", dark_purple, light_purple)
 make_one_big_plot("Tapachula", "Vergel", "Guadeloupe Mosquito Virus", dark_purple, light_purple)
+
+

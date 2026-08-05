@@ -42,6 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libtiff5-dev \
     libjpeg-dev \
+    libuv1-dev \
     pandoc \
     curl \
     gdebi-core \
@@ -61,6 +62,9 @@ RUN Rscript -e "install.packages(c( \
     'binom', \
     'patchwork', \
     'lme4', \
+    'broom.helpers', \
+    'broom.mixed', \
+    'fs', \
     'gtsummary', \
     'sjPlot', \
     'flextable', \
@@ -71,7 +75,7 @@ RUN Rscript -e "install.packages(c( \
 
 # --- Sanity check that everything loads at build time (fail fast) ---
 RUN Rscript -e "library(tidyverse); library(readxl); library(binom); \
-    library(patchwork); library(lme4); library(gtsummary); library(sjPlot); \
+    library(patchwork); library(lme4); library(broom.helpers); library(broom.mixed); library(fs); library(gtsummary); library(sjPlot); \
     library(flextable); library(knitr); library(ggpubr); library(rstatix); \
     cat('All packages loaded OK\n')"
 

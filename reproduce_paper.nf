@@ -9,38 +9,48 @@ workflow {
   main:
     
     // run code that generates papers and programmatically-generated text
-    generate_figures_and_text()
+    data_ch = Channel.fromPath(params.qpcr_data, checkIfExists: true)
+    generate_figures_and_text(data_ch)
 
     // run code to generate the .doc format paper 
-    qmd_ch = Channel.fromPath(params.qmd, checkIfExists: true)
-    reproduce_paper(qmd_ch, 
-                    generate_figures_and_text.out.figures,
-                    generate_figures_and_text.out.tables,
-                    generate_figures_and_text.out.text )
+    Channel.of( 
+     tuple(
+        file(params.qmd), 
+        file(params.refs), 
+        file(params.csl), 
+        file(params.custom_doc)
+     ) ).set { paper_files_ch }
+
+    // qmd_ch       = Channel.fromPath(params.qmd, checkIfExists: true)
+    edited_figures_ch = Channel.fromPath(params.edited_figures, checkIfExists: true)
+    render_paper(paper_files_ch,
+                 edited_figures_ch,
+                 generate_figures_and_text.out.figures,
+                 generate_figures_and_text.out.tables,
+                 generate_figures_and_text.out.text )
 
   publish:
-    paper    = reproduce_paper.out.paper
     figures  = generate_figures_and_text.out.figures
     tables   = generate_figures_and_text.out.tables
     text     = generate_figures_and_text.out.text   
+    paper    = render_paper.out.paper
 }
 
 // workflow main output files 
 output {
     paper {
-        path 'paper'
         mode 'link'
     }
     figures {
-        path 'analysis_output/figures'
+        path 'figures'
         mode 'link'
     }
     tables {
-        path 'analysis_output/tables'
+        path 'tables'
         mode 'link'
     }
     text {
-        path 'analysis_output/text'
+        path 'text'
         mode 'link'
     }
 }
@@ -49,7 +59,10 @@ process generate_figures_and_text {
 
   // this custom docker/singularity container includes
   // necessary tools (R, R packages, etc)
-  container 'ghcr.io/stenglein-lab/aedes_isv_vt:1.0'
+  container 'ghcr.io/stenglein-lab/aedes_isv_vt:1.1'
+
+  input:
+    path qPCR_data
 
   output:
     path "figures", emit: figures
@@ -62,21 +75,22 @@ process generate_figures_and_text {
     # this script is in the bin dir so nextflow will be able to find it
     # and it has executable permissions so can be run 
     # it has a Rscript shebang
-    Aedes_ISV_vertical_transmission_analysis.R
+    Aedes_ISV_vertical_transmission_analysis.R $qPCR_data
   """
 }
 
-process reproduce_paper {
+process render_paper {
 
   // this custom docker/singularity container includes
   // necessary tools (R, R packages, etc)
-  container 'ghcr.io/stenglein-lab/aedes_isv_vt:1.0'
+  container 'ghcr.io/stenglein-lab/aedes_isv_vt:1.1'
 
   input:
-    path qmd
+    tuple path (qmd), path (refs), path (csl), path (custom_doc)
     // including the following paths as inputs to this process 
     // will cause the corresponding directories to be available
     // as relative paths to the .qmd document
+    path edited_figures
     path figures
     path tables
     path text
@@ -87,7 +101,7 @@ process reproduce_paper {
   script:
   """
     # render quarto markdown file to docx
-    quarto render $qmd --to docx
+    quarto render $qmd --to docx -P baseDir:"$projectDir"
   """
 }
 

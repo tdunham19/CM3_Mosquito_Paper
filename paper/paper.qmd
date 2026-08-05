@@ -5,6 +5,9 @@ format:
     reference-doc: custom-reference-doc.docx
     tbl-cap-location: bottom
 
+params:
+  baseDir: "./"
+
 bibliography: references.bib
 csl: asm.csl #Get themes at https://github.com/citation-style-language/styles
 crossref:
@@ -157,14 +160,14 @@ Models used the lme4 R package version 2.0-1 [@Bates_2015]. Models for vertical 
 
 ```{r}
 # import and summarize metagenomic read count data
-read_counts <- read_excel("../metagenomics/CM3_metagenomic_sequencing_read_counts.xlsx")
+read_counts <- read_excel(paste0(params$baseDir, "/metagenomics/CM3_metagenomic_sequencing_read_counts.xlsx"))
 read_count_avgs <- read_counts %>% group_by(count_type) %>% summarize(mean_count = mean(count),
                                                                       median_count = median(count))
 initial_read_counts <- filter(read_count_avgs, count_type == "initial") %>% pull(mean_count)
 post_read_counts    <- filter(read_count_avgs, count_type == "post_host_filtered") %>% pull(mean_count)
 
 # table of virus sequence info
-metagenomic_table <- read_excel("../metagenomics/metagenomic_viruses.xlsx")
+metagenomic_table <- read_excel(paste0(params$baseDir, "/metagenomics/metagenomic_viruses.xlsx"))
 ```
 
 We used shotgun metagenomic sequencing to characterize the viruses infecting *Ae. aegypti* in four colonies maintained in our insectary. We prepared libraries from total RNA from mixed-sex pools of parental mosquitoes from experimental crosses. Libraries were sequenced on an Illumina NovaSeq X instrument to generate an average of `r sci_notation(initial_read_counts)` read pairs per dataset. Following quality and adapter trimming and removal of host-mapping reads, an average of `r sci_notation(post_read_counts)` read pairs per dataset remained (`r sprintf("%0.0f", (100 * post_read_counts / initial_read_counts))`%). Remaining reads were assembled and contigs were used as BLAST queries to the NCBI nucleotide and protein databases to identify virus contigs.
@@ -178,7 +181,9 @@ In summary, metagenomic sequencing identified the sequences of four ISVs: *Aedes
 flextable(metagenomic_table) %>%
   theme_zebra(odd_header = "transparent") %>%      
   bold(part = "header")  %>%
-  set_table_properties(layout="autofit", width = 1)
+  set_table_properties(layout="autofit", width = 1) %>%
+  font(fontname = "Arial", part = "all") %>%
+  fontsize(size = 11, part = "all")
 ```
 
 Virus sequences identified in *Aedes aegypti* colonies using shotgun metagenomic sequencing
@@ -201,9 +206,9 @@ To determine the efficiency with which these viruses were transmitted from adult
 
 ::: {#fig-anphe layout-ncol=1 height=8in}
 
-![](./figures/Poza_Rica_x_New_Orleans_Aedes_Anphevirus.png)
+![](./edited_figures/Poza_Rica_x_New_Orleans_Aedes_Anphevirus.png)
 
-![](./figures/Poza_Rica_x_Vergel_Aedes_Anphevirus.png)
+![](./edited_figures/Poza_Rica_x_Vergel_Aedes_Anphevirus.png)
 
 **Prevalence and transmission of *Aedes* anphevirus.** Upper panels show prevalence of AeAV in different populations of parental and offspring mosquitoes. Error bars indicate binomial 95% confidence intervals. Lower panels show levels of AeAV RNA detected by RT-qPCR in individual mosquitoes normalized to levels of actin mRNA. Values for uninfected mosquitoes are plotted in grey on the lowest Y axis position. Rep refers to replicate crosses. (A) Crosses between mosquitoes from the Poza Rica colony and the New Orleans colony. (B) Crosses between mosquitoes from the Poza Rica colony and the Vergel colony. The same data for parental Poza Rica is shown in upper and lower panels.
 :::
@@ -211,15 +216,17 @@ To determine the efficiency with which these viruses were transmitted from adult
 
 ::: {#tbl-anphe-model}
 ```{r}
-# read in table of anphevirus model table 
-theme_gtsummary_printer('flextable')
+# theme_gtsummary_printer('flextable')
+set_gtsummary_theme(theme_gtsummary_printer(print_engine = "flextable"))
 
+# read in table of anphevirus model table 
 anphe_model_table <- readRDS("tables/anphe_model_table.RDS")
 
-anphe_model_table
-# anphe_model_table %>%
-  # as_flex_table() %>%
-  # set_table_properties(layout="autofit", width = 1)
+anphe_model_table %>%
+  as_flex_table() %>%
+  set_table_properties(layout="autofit", width = 1) %>%
+  font(fontname = "Arial", part = "all") %>%
+  fontsize(size = 11, part = "all")
 ```
 
 **Logistic regression model of anphevirus transmission.**
@@ -236,9 +243,9 @@ Verdadero virus is a two-segmented double-stranded (ds) RNA virus similar to vir
 
 ::: {#fig-verd layout-ncol=1 height=10in}
 
-![](./figures/Poza_Rica_x_New_Orleans_Verdadero_Virus.png)
+![](./edited_figures/Poza_Rica_x_New_Orleans_Verdadero_Virus.png)
 
-![](./figures/Poza_Rica_x_Vergel_Verdadero_Virus.png)
+![](./edited_figures/Poza_Rica_x_Vergel_Verdadero_Virus.png)
 
 **Prevalence and transmission of verdadero virus.** Upper panels show prevalence of verdadero virus in different populations of parental and offspring mosquitoes. Error bars indicate binomial 95% confidence intervals. Lower panels show levels of verdadero virus RNA detected by RT-qPCR in individual mosquitoes normalized to levels of actin mRNA. Values for uninfected mosquitoes are plotted in grey on the lowest Y axis position. Rep refers to replicate crosses. (A) Crosses between mosquitoes from the Poza Rica colony and the New Orleans colony. (B) Crosses between mosquitoes from the Poza Rica colony and the Vergel colony. The same data for parental Poza Rica is shown in upper and lower panels.  
 :::
@@ -249,7 +256,11 @@ Verdadero virus is a two-segmented double-stranded (ds) RNA virus similar to vir
 # read in table of anphevirus model table 
 verdadero_model_table <- readRDS("tables/verdadero_model_table.RDS")
 
-verdadero_model_table  
+verdadero_model_table %>%
+  as_flex_table() %>%
+  set_table_properties(layout="autofit", width = 1) %>%
+  font(fontname = "Arial", part = "all") %>%
+  fontsize(size = 11, part = "all")
 ```
 
 **Logistic regression model of verdadero virus transmission.**
@@ -265,9 +276,9 @@ Guadeloupe mosquito virus (GMV) is a two-segmented positive sense single-strande
 
 ::: {#fig-gmv layout-ncol=1 height=10in}
 
-![](./figures/Poza_Rica_x_New_Orleans_Guadeloupe_Mosquito_Virus.png)
+![](./edited_figures/Poza_Rica_x_New_Orleans_Guadeloupe_Mosquito_Virus.png)
 
-![](./figures/Poza_Rica_x_Vergel_Guadeloupe_mosquito_Virus.png)
+![](./edited_figures/Poza_Rica_x_Vergel_Guadeloupe_mosquito_Virus.png)
 
 **Prevalence and transmission of Guadeloupe mosquito virus from crosses involving Poza Rica parents.** Upper panels show prevalence of GMV in different populations of parental and offspring mosquitoes. Error bars indicate binomial 95% confidence intervals. Lower panels show levels of GMV RNA detected by RT-qPCR in individual mosquitoes normalized to levels of actin mRNA. Values for uninfected mosquitoes are plotted in grey on the lowest Y axis position. Rep refers to replicate crosses. (A) Crosses between mosquitoes from the Poza Rica colony and the New Orleans colony. (B) Crosses between mosquitoes from the Poza Rica colony and the Vergel colony. The same data for parental Poza Rica is shown in upper and lower panels. Infected mothers and infected fathers refers to the sex of the much more highly infected parents from the Poza Rica population.
 :::
@@ -277,7 +288,11 @@ Guadeloupe mosquito virus (GMV) is a two-segmented positive sense single-strande
 # read in table of anphevirus model table 
 gmv_model_table <- readRDS("tables/gmv_model_table.RDS")
 
-gmv_model_table  
+gmv_model_table %>%
+  as_flex_table() %>%
+  set_table_properties(layout="autofit", width = 1) %>%
+  font(fontname = "Arial", part = "all") %>%
+  fontsize(size = 11, part = "all")
 ```
 
 **Logistic regression model of GMV transmission.**  Main infected parent colony refers to the highly-infected parental colony: Poza Rica vs. Tapachula.  Less infected parent colony reflects the parental colony with low-level infection: New Orleans vs. Vergel.  The horizontal transmission model included replicate as a random effect. 
@@ -324,7 +339,7 @@ The authors wish to thank Kai Chase, Susi Bennett, Irma Sanchez-Vargas, Megan Mi
 
 ```{r}
 # read in supplemental tables
-primer_table <- read_excel("./tables/supplemental_table_primers.xlsx")
+primer_table <- read_excel(paste0(params$baseDir, "/paper/tables/supplemental_table_primers.xlsx"))
 ```
 
 ::: {#supptab-primers}
@@ -332,7 +347,9 @@ primer_table <- read_excel("./tables/supplemental_table_primers.xlsx")
 flextable(primer_table) %>%
   theme_zebra(odd_header = "transparent") %>%      
   bold(part = "header")  %>%
-  set_table_properties(layout="autofit", width = 1)
+  set_table_properties(layout="autofit", width = 1) %>%
+  font(fontname = "Arial", part = "all") %>%
+  fontsize(size = 11, part = "all")
 ```
 
 Primer sequences used this study.
@@ -342,7 +359,7 @@ Primer sequences used this study.
 {{< pagebreak >}}
 
 ::: {#suppfig-rearing}
-![](./figures/Rearing_schedule_and_lifecycle.png)
+![](./edited_figures/Rearing_schedule_and_lifecycle.png)
 
 ***Aedes Aegypti* Rearing Schedule and Lifecycle:** Outline of experiment, *Aedes aegypti* life cycle and screening time points throughout the experiment. Created in BioRender. Dunham, T. (2026) https://BioRender.com/1wb7iq3.
 :::
@@ -350,7 +367,7 @@ Primer sequences used this study.
 {{< pagebreak >}}
 
 ::: {#suppfig-map}
-![](./figures/CM3_Map_with_virus_list.png)
+![](./edited_figures/CM3_Map_with_virus_list.png)
 
 **Map of original collection locations of *Aedes aegypti* colonies used for this project.**
 :::
@@ -358,7 +375,7 @@ Primer sequences used this study.
 {{< pagebreak >}}
 
 ::: {#suppfig-coverage}
-![](./figures/Supplemental_figure_coverage_plot.png)
+![](./edited_figures/Supplemental_figure_coverage_plot.png)
 
 **Coverage depth of virus sequences identified in *Aedes aegypti* colonies using shotgun metagenomic sequencing.** Average coverage depth of mapped reads in 10-nucleotide windows is plotted. NCBI nucleotide accessions of virus sequences are indicated.
 ::: 
@@ -367,9 +384,9 @@ Primer sequences used this study.
 
 ::: {#suppfig-gmv layout-ncol=1 height=10in}
 
-![](./figures/Tapachula_x_New_Orleans_Guadeloupe_Mosquito_Virus.png)
+![](./edited_figures/Tapachula_x_New_Orleans_Guadeloupe_Mosquito_Virus.png)
 
-![](./figures/Tapachula_x_Vergel_Guadeloupe_mosquito_Virus.png)
+![](./edited_figures/Tapachula_x_Vergel_Guadeloupe_mosquito_Virus.png)
 
 **Prevalence and transmission of Guadeloupe mosquito virus from crosses involving Tapachula colony parents.** Upper panels show prevalence of GMV in different populations of parental and offspring mosquitoes. Error bars indicate binomial 95% confidence intervals. Lower panels show levels of GMV RNA detected by RT-qPCR in individual mosquitoes normalized to levels of actin mRNA. Values for uninfected mosquitoes are plotted in grey on the lowest Y axis position. Rep refers to replicate crosses. (A) Crosses between mosquitoes from the Tapachula colony and the New Orleans colony. (B) Crosses between mosquitoes from the Tapachula colony and the Vergel colony. Data for parental New Orleans and Vergel mosquitoes as in [@fig-gmv]. The same data for parental Tapachula is shown in upper and lower panels. Infected mothers and infected fathers refers to the sex of the much more highly infected parents from the Poza Rica population.
 :::
@@ -378,7 +395,7 @@ Primer sequences used this study.
 
 ::: {#suppfig-gmv-msa}
 
-![](./figures/gmv_msa.pdf)
+![](./edited_figures/gmv_msa.pdf)
 
 **A multiple sequence alignment of Guadeloupe mosquito virus RNA 1 sequences from the four *Aedes aegypti* colonies.**  This alignment shows the region amplified by the primers used to detect and quantify GMV, excluding primer-binding sites [@supptab-primers]. The sequences from the New Orleans and Vergel colonies were determined using Sanger sequencing. The sequences from the Poza Rica and Vergel colonies were determined using metagenomic RNA sequencing. An R base in the Vergel sequence corresponds to a position where the Sanger chromatogram showed equal-height A and G peaks.
 ::: 

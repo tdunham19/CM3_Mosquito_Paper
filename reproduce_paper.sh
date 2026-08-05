@@ -6,4 +6,10 @@
 #
 # Mark Stenglein, Aug 2026
 
-nextflow run -resume reproduce_paper.nf
+# create a new directory in the pwd to provide a 
+# location in which to build singularity image 
+# (presumably with ample storage)
+mkdir -p $HOME/.cache/singularity
+export SINGULARITY_TMPDIR=$HOME/.cache/singularity
+
+nextflow run -resume reproduce_paper.nf -output-dir workflow_output
