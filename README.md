@@ -23,4 +23,8 @@ cd CM3_Mosquito_Paper
 
 ### Dependencies
 
-The main dependencies to reproduce the paper are [nextflow](https://www.nextflow.io/) and [singularity](https://www.anaconda.com/docs/getting-started/miniconda/system-requirements).  Other dependencies are handled via a [custom](./docker/README.md) docker/singularity [image](https://github.com/users/stenglein-lab/packages/container/package/aedes_isv_vt) that will be downloaded automatically by nextflow.
+The main dependencies to reproduce the paper are [nextflow](https://www.nextflow.io/) and [singularity](https://docs.sylabs.io/guides/latest/user-guide/#). Nextflow and Singularity must be installed on your system to reproduce the paper.  Other dependencies are handled via a [custom](./docker/README.md) docker/singularity [image](https://github.com/users/stenglein-lab/packages/container/package/aedes_isv_vt) that will be downloaded automatically by nextflow.
+
+### Figures and Edited Figures
+
+The R code provided in this repository generates the main figures contained in the paper's results. These fgures were subsequently edited using [Affinity Designer](https://www.affinity.studio/) to add additional labels. The edited versions of the figures are provided in the edited_figures directory of this repository.
