@@ -32,12 +32,12 @@ echo YOUR_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
 ### Build the image
 
 ```
-docker buildx build --platform linux/amd64 -t stenglein-lab/aedes_isv_vt:1.0 .
+docker buildx build --platform linux/amd64 -t stenglein-lab/aedes_isv_vt:1.1 .
 ```
 
 ### Publish (push) the image to GHCR
 
 ```
-docker push ghcr.io/stenglein-lab/aedes_isv_vt:1.0
+docker push ghcr.io/stenglein-lab/aedes_isv_vt:1.1
 ```
 
