@@ -23,7 +23,7 @@ cd CM3_Mosquito_Paper
 
 Alternatively, you can reproduce the paper by running the nextflow workflow [from github](https://docs.seqera.io/nextflow/sharing):
 ```
-nextflow run -resume tdunham19/CM3_Mosquito_Paper -output-dir workflow_output 
+nextflow run tdunham19/CM3_Mosquito_Paper 
 ```
 
 ### How does this all work?
